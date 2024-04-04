@@ -1,0 +1,22 @@
+{
+    "title": "Note",
+    "type": "object",
+    "properties": {
+        "id": {
+            "type": "integer"
+        },
+        "title": {
+            "type": "string"
+        },
+        "content": {
+            "type": "string"
+        },
+        "tags": { "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "required": ["id", "title", "content", "tags"]
+}
+    
