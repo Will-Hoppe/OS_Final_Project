@@ -17,6 +17,6 @@
             }
         }
     },
-    "required": ["id", "title", "content", "tags"]
+    "required": ["title", "content", "tags"]
 }
     
