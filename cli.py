@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-
-import os
+import time
 import typer
 import json
 from jsonschema import validate as validate_json
@@ -45,11 +44,6 @@ def create(entry: str):
         typer.echo(f"Error: Database entry does not fit schema.")
 
 @app.command()
-def delete(filename: str):
-    """Delete a file."""
-    pass
-
-@app.command()
 def search(entry: str = typer.Option(None, "--value", help="Find entered value within data"),
            keyword: str= typer.Option(None, "--keyword", help="Specify part of data to find value"),
            id: str= typer.Option(None, "--update", help="Update record with new data")):
@@ -69,7 +63,7 @@ def search(entry: str = typer.Option(None, "--value", help="Find entered value w
                         elif validate(entry):
                             json_entry = json.loads(entry)
                             json_entry["id"] = id
-                            database["entries"][i] = entry
+                            database["entries"][i] = json_entry
                             with open("database.json", 'w') as file:
                                 typer.echo(f"Database entry updated successfully.")
                                 json.dump(database, file)
@@ -84,18 +78,38 @@ def search(entry: str = typer.Option(None, "--value", help="Find entered value w
                 if entry is None:
                     typer.echo(f"No value provided to search for")
                     return
-                for i in range(len(database["entries"])):
-                    option=str(database["entries"][i][keyword])
-                    if entry in option:
-                        found=True
-                        typer.echo("Entry with value {}: {}".format(entry, database["entries"][i]))
-                if not found:
-                    typer.echo("No entry with value {} found".format(entry, database["entries"][i]))
+                with typer.progressbar(database["entries"]) as progress:
+                    res = []
+                    for e in progress:
+                        time.sleep(0.0001)
+                        option=str(e[keyword])
+                        if entry in option:
+                            found=True
+                            res.append("Entry with value {}: {}".format(entry, e))
+                    if found:
+                        print()
+                        typer.echo("\n\n".join(res))
+                        typer.echo(f"\nFound total of {len(res)} entries with {entry}")
+                    else:
+                        typer.echo("No entry with value {} found".format(entry))
             elif entry is not None:
                 found=False
-                for i in range(len(database["entries"])):
-                    allparts=database["entries"][i]
-                    print(allparts)
+                res = []
+                with typer.progressbar(database["entries"]) as progress:
+                    for e in progress:
+                        time.sleep(0.0001)
+                        for keyword in e:
+                            option=str(e[keyword])
+                            if entry in option:
+                                found=True
+                                res.append("Entry with value {}: {}".format(entry, e))
+                                break
+                if found:
+                    print()
+                    typer.echo("\n\n".join(res))
+                    typer.echo(f"\nFound total of {len(res)} entries with {entry}")
+                else:
+                    typer.echo("No entry with value {} found".format(entry))
             else:
                 typer.echo("Provide flags to use search")
     except FileNotFoundError:
@@ -104,8 +118,8 @@ def search(entry: str = typer.Option(None, "--value", help="Find entered value w
         typer.echo("Error: database.json contains invalid JSON content.")
     
 @app.command()
-def read(all: bool = typer.Option(False, "--all", help="Read all entries"),
-         id: int = typer.Option(None, "--id", help="Read entry with specified ID")):
+def read(id: int = typer.Option(None, "--id", help="Read entry with specified ID"),
+         all: bool = typer.Option(False, "--all", help="Read all entries")):
     """Search for something in database"""
     try:
         with open('database.json', 'r') as file:
@@ -119,7 +133,7 @@ def read(all: bool = typer.Option(False, "--all", help="Read all entries"),
                 for entry in database["entries"]:
                     if entry.get("id") == id:
                         typer.echo("Entry with ID {}: {}".format(id, entry))
-                        entry_found = True
+                        entry_found = True    
                         break
                 if not entry_found:
                     typer.echo(f"Entry with ID {id} not found.")
@@ -130,6 +144,35 @@ def read(all: bool = typer.Option(False, "--all", help="Read all entries"),
     except json.JSONDecodeError:
         typer.echo("Error: database.json contains invalid JSON content.")
     
-
+@app.command()
+def delete(id: int = typer.Option(None, "--id", help="Delete entry with specified ID"),
+           all: bool = typer.Option(False, "--all", help="Delete all entries")):
+    try:
+        with open('database.json', 'r') as file:
+            database = json.load(file)
+            if all:
+                database = {"entries": [], "max_id": 0}
+                with open("database.json", 'w') as file:
+                    json.dump(database, file)
+                typer.echo(f"All entries deleted successfully.")
+            elif id is not None:
+                entry_found = False
+                for entry in database["entries"]:
+                    if entry.get("id") == str(id):
+                        database["entries"].remove(entry)
+                        typer.echo("Entry with ID {} deleted successfully.".format(id))
+                        entry_found = True
+                        with open("database.json", 'w') as file:
+                            json.dump(database, file)
+                        break
+                if not entry_found:
+                    typer.echo(f"Entry with ID {id} not found.")
+            else:
+                typer.echo("Please provide an option: --all or --id.")
+    except FileNotFoundError:
+        typer.echo("Error: database.json not found.")
+    except json.JSONDecodeError:
+        typer.echo("Error: database.json contains invalid JSON content.")
+    
 if __name__ == "__main__":
     app()
