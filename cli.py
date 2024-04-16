@@ -38,7 +38,7 @@ def create(entry: str):
     database["entries"].append(json_entry)
     if validate(entry):
         with open("database.json", 'w') as file:
-            json.dump(database, file)
+            json.dump(database, file, indent=4)
         typer.echo(f"Database entry created successfully.")
     else:
         typer.echo(f"Error: Database entry does not fit schema.")
@@ -62,11 +62,11 @@ def search(entry: str = typer.Option(None, "--value", help="Find entered value w
                             return
                         elif validate(entry):
                             json_entry = json.loads(entry)
-                            json_entry["id"] = id
+                            json_entry["id"] = int(id)
                             database["entries"][i] = json_entry
                             with open("database.json", 'w') as file:
                                 typer.echo(f"Database entry updated successfully.")
-                                json.dump(database, file)
+                                json.dump(database, file, indent=4)
                                 return
                         else:
                             typer.echo(f"Error: Database entry does not fit schema.")
@@ -87,7 +87,7 @@ def search(entry: str = typer.Option(None, "--value", help="Find entered value w
                             found=True
                             res.append("Entry with value {}: {}".format(entry, e))
                     if found:
-                        print()
+                        print('\n')
                         typer.echo("\n\n".join(res))
                         typer.echo(f"\nFound total of {len(res)} entries with {entry}")
                     else:
@@ -153,17 +153,17 @@ def delete(id: int = typer.Option(None, "--id", help="Delete entry with specifie
             if all:
                 database = {"entries": [], "max_id": 0}
                 with open("database.json", 'w') as file:
-                    json.dump(database, file)
+                    json.dump(database, file, indent=4)
                 typer.echo(f"All entries deleted successfully.")
             elif id is not None:
                 entry_found = False
                 for entry in database["entries"]:
-                    if entry.get("id") == str(id):
+                    if str(entry.get("id")) == str(id):
                         database["entries"].remove(entry)
                         typer.echo("Entry with ID {} deleted successfully.".format(id))
                         entry_found = True
                         with open("database.json", 'w') as file:
-                            json.dump(database, file)
+                            json.dump(database, file, indent=4)
                         break
                 if not entry_found:
                     typer.echo(f"Entry with ID {id} not found.")
