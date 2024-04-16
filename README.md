@@ -61,7 +61,7 @@ This command searches through all keywords of each entry, searching through ever
 ## Reading all entries
 
 ```bash
-python3 [cli.py](http://cli.py/) read --all
+python3 cli.py read --all
 ```
 
 This displays all database entries.
@@ -69,7 +69,7 @@ This displays all database entries.
 ## Reading an entry by ID
 
 ```bash
-python3 [cli.py](http://cli.py/) read --id 9
+python3 cli.py read --id 9
 ```
 
 This shows the entry stored in the database at ID 9.
@@ -85,7 +85,7 @@ This command updates the entry with ID 9 with the information entered after --va
 Try running the read --id 9 command again to check whether it updated.
 
 ```bash
-python3 [cli.py](http://cli.py/) read --id 9
+python3 cli.py read --id 9
 ```
 
 ## Deleting an entry by ID
@@ -97,7 +97,7 @@ python3 cli.py delete --id 9
 This deletes the entry stored with ID 9. Try running the read --id 9 command again to check whether it is deleted. It will say entry not found when deleted properly.
 
 ```bash
-python3 [cli.py](http://cli.py/) read --id 9
+python3 cli.py read --id 9
 ```
 
 ## Deleting all entries
@@ -109,7 +109,7 @@ python3 cli.py delete --all
 This will delete all entries in the database. To see whether all are deleted run the read all command or look in the database file. 
 
 ```bash
-python3 [cli.py](http://cli.py/) read --all
+python3 cli.py read --all
 ```
 
 ## Creating a new database
